@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#172640">
+  <meta name="description" content="ระบบสำรวจโต๊ะจีน งานมุทิตาจิต อำเภอเกษตรวิสัย">
+  <title>สำรวจโต๊ะจีน · ศูนย์เครือข่ายที่ 9</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Pridi:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <header class="topbar">
+    <a class="brand" href="#survey" aria-label="หน้าหลัก"><span class="brand-mark">๙</span><span><b>ศูนย์เครือข่ายที่ 9</b><small>ทุ่งใหญ่ · เกษตรวิสัย</small></span></a>
+    <nav aria-label="เมนูหลัก">
+      <a href="#survey" data-route-link="survey">ลงทะเบียน</a>
+      <a href="#status" data-route-link="status">สถานะการชำระ</a>
+      <a href="#admin" data-route-link="admin">ผู้ดูแล</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="survey" class="view" data-view="survey">
+      <div class="hero">
+        <div class="hero-copy">
+          <span class="eyebrow"><i></i> งานมุทิตาจิตอำเภอเกษตรวิสัย</span>
+          <h1>ร่วมส่งความสุข<br><em>ผ่านโต๊ะแห่งมิตรภาพ</em></h1>
+          <p>สำรองโต๊ะจีนสำหรับโรงเรียนในศูนย์เครือข่ายที่ 9 ได้ง่าย ๆ ภายในไม่กี่นาที</p>
+          <div class="event-meta"><span>ศุกร์ 25 กันยายน 2569</span><span>8 ที่นั่ง / โต๊ะ</span></div>
+        </div>
+        <aside class="price-card"><small>ราคาโต๊ะละ</small><strong>2,200</strong><span>บาท</span><div class="gold-line"></div><p>ระบบจะคำนวณยอดให้โดยอัตโนมัติ</p></aside>
+      </div>
+
+      <div class="form-shell">
+        <div class="form-heading"><span>01</span><div><h2>ข้อมูลการสำรองโต๊ะ</h2><p>กรอกข้อมูลให้ครบถ้วนเพื่อยืนยันสิทธิ์</p></div></div>
+        <form id="surveyForm" novalidate>
+          <label class="field full"><span>โรงเรียน <b>*</b></span><div class="select-wrap"><select id="school" required><option value="">กำลังโหลดรายชื่อโรงเรียน…</option></select></div><small class="error"></small></label>
+          <div class="field"><span>จำนวนโต๊ะ <b>*</b></span><div class="stepper"><button type="button" id="minus" aria-label="ลดจำนวน">−</button><output id="tableCount">1</output><button type="button" id="plus" aria-label="เพิ่มจำนวน">+</button></div><small>โต๊ะละ 8 ที่นั่ง</small></div>
+          <div class="total-panel"><span>ยอดที่ต้องชำระ</span><strong id="totalAmount">฿2,200</strong><small>จำนวน <b id="summaryTables">1 โต๊ะ</b></small></div>
+          <label class="field"><span>ชื่อผู้กรอก <b>*</b></span><input id="contactName" autocomplete="name" placeholder="ชื่อ–นามสกุล" required><small class="error"></small></label>
+          <label class="field"><span>เบอร์โทรศัพท์ <b>*</b></span><input id="phone" inputmode="tel" autocomplete="tel" maxlength="12" placeholder="08X-XXX-XXXX" required><small class="error"></small></label>
+          <fieldset class="field full payment-field"><legend>วิธีชำระเงิน <b>*</b></legend><div class="choice-grid">
+            <label class="choice"><input type="radio" name="payment" value="cash" required><span class="choice-icon">฿</span><span><b>เงินสด</b><small>ชำระกับผู้ประสานงาน</small></span><i></i></label>
+            <label class="choice"><input type="radio" name="payment" value="transfer"><span class="choice-icon">↗</span><span><b>โอนเงิน</b><small>ผ่านบัญชีธนาคาร</small></span><i></i></label>
+          </div><small class="error"></small></fieldset>
+          <section id="transferSection" class="transfer-section full" hidden>
+            <div class="bank-card"><div class="bank-logo">KTB</div><div><small>ธนาคารกรุงไทย</small><b>นายอวยชัย เจนไชย</b><strong id="accountNumber">665-3-33643-3</strong></div><button type="button" id="copyAccount">คัดลอก</button></div>
+            <label class="upload" id="uploadBox"><input type="file" id="slipInput" accept="image/jpeg,image/png,image/webp"><span class="upload-icon">↑</span><b>อัปโหลดสลิปโอนเงิน</b><small>แตะเพื่อถ่ายภาพหรือเลือกไฟล์ · JPG, PNG, WEBP ไม่เกิน 5 MB</small><img id="slipPreview" alt="ตัวอย่างสลิป" hidden></label><small class="error" id="slipError"></small>
+          </section>
+          <label class="consent full"><input type="checkbox" id="consent" required><span>ข้าพเจ้ายืนยันว่าข้อมูลข้างต้นถูกต้อง และยินยอมให้ใช้ข้อมูลเพื่อประสานงานกิจกรรมนี้</span></label>
+          <button class="primary-button full" id="submitButton" type="submit"><span>ยืนยันและส่งข้อมูล</span><i>→</i></button>
+        </form>
+      </div>
+    </section>
+
+    <section id="status" class="view" data-view="status" hidden>
+      <div class="page-intro"><span class="eyebrow"><i></i> อัปเดตล่าสุด <b id="lastUpdated">—</b></span><h1>สถานะการชำระเงิน</h1><p>ติดตามการตอบรับของโรงเรียนในศูนย์เครือข่ายที่ 9</p></div>
+      <div id="publicStats" class="stats-grid"></div>
+      <div class="data-card"><div class="table-tools"><div><h2>รายชื่อโรงเรียน</h2><p>แสดงเฉพาะข้อมูลสำหรับสาธารณะ</p></div><label class="search"><span>⌕</span><input id="publicSearch" placeholder="ค้นหาโรงเรียน…"></label></div><div class="table-scroll"><table><thead><tr><th>โรงเรียน</th><th>โต๊ะ</th><th>ยอดเงิน</th><th>วิธีชำระ</th><th>สถานะ</th></tr></thead><tbody id="publicTable"></tbody></table></div></div>
+    </section>
+
+    <section id="admin" class="view" data-view="admin" hidden>
+      <div id="loginPanel" class="login-wrap"><div class="login-card"><span class="brand-mark large">๙</span><span class="eyebrow">พื้นที่สำหรับผู้ดูแล</span><h1>ยินดีต้อนรับกลับ</h1><p>เข้าสู่ระบบเพื่อจัดการข้อมูลและตรวจสอบยอดชำระ</p><form id="loginForm"><label class="field"><span>รหัสผ่านผู้ดูแล</span><div class="password-wrap"><input id="adminPassword" type="password" autocomplete="current-password" required placeholder="กรอกรหัสผ่าน"><button type="button" id="togglePassword">แสดง</button></div></label><button class="primary-button" type="submit">เข้าสู่ระบบ <i>→</i></button><small id="loginError" class="error"></small></form><a href="#survey">← กลับหน้าลงทะเบียน</a></div></div>
+      <div id="dashboard" hidden><div class="dashboard-head"><div><span class="eyebrow"><i></i> ระบบจัดการ</span><h1>ภาพรวมกิจกรรม</h1><p>ตรวจสอบและอัปเดตข้อมูลการชำระเงิน</p></div><button id="logoutButton" class="ghost-button">ออกจากระบบ</button></div><div id="adminStats" class="stats-grid"></div><div class="data-card"><div class="table-tools"><label class="search"><span>⌕</span><input id="adminSearch" placeholder="ค้นหาโรงเรียนหรือผู้ติดต่อ…"></label><select id="statusFilter"><option value="ALL">สถานะทั้งหมด</option><option value="PENDING">รอตรวจสอบ</option><option value="PAID">ชำระแล้ว</option><option value="UNPAID">ยังไม่ชำระ</option><option value="MISSING">ยังไม่ส่งข้อมูล</option></select></div><div class="table-scroll"><table><thead><tr><th>โรงเรียน / ผู้ติดต่อ</th><th>โต๊ะ</th><th>ยอดเงิน</th><th>วิธีชำระ</th><th>สถานะ</th><th></th></tr></thead><tbody id="adminTable"></tbody></table></div></div></div>
+    </section>
+  </main>
+  <footer><span>ศูนย์เครือข่ายที่ 9 ทุ่งใหญ่</span><span>ข้อมูลส่วนบุคคลใช้เพื่อการประสานงานเท่านั้น</span></footer>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <dialog id="successDialog"><button class="dialog-close" aria-label="ปิด">×</button><div class="success-icon">✓</div><span class="eyebrow">ส่งข้อมูลเรียบร้อย</span><h2>ขอบคุณที่ร่วมเป็นส่วนหนึ่ง</h2><p>เราได้รับข้อมูลของ <b id="successSchool"></b> แล้ว ผู้ดูแลจะตรวจสอบและอัปเดตสถานะโดยเร็ว</p><div class="receipt"><span>เลขที่รายการ</span><strong id="receiptId">—</strong></div><a class="primary-button" href="#status">ดูสถานะการชำระเงิน <i>→</i></a></dialog>
+  <dialog id="detailDialog"><button class="dialog-close" aria-label="ปิด">×</button><div id="detailContent"></div></dialog>
+  <script src="js/config.js"></script><script src="js/api.js"></script><script src="js/app.js"></script>
+</body>
+</html>
