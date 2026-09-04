@@ -13,3 +13,15 @@
   .bank-card>button{grid-column:3;grid-row:3;margin-top:14px;margin-left:0;min-width:76px}
   .upload small{font-size:13px;line-height:1.5;padding:0 8px}
 }
+
+/* Accessibility and narrow-screen navigation refinements. */
+input::placeholder{color:#7d838c;opacity:1}
+.consent{min-height:52px;padding:10px 8px;margin:-4px -8px;align-items:flex-start;cursor:pointer;border-radius:10px}
+.consent input{width:22px;height:22px;margin:1px 2px 0 0}
+.consent span{font-size:15px;line-height:1.55}
+@media(max-width:520px){
+  .topbar{padding-inline:14px}
+  .brand>span:last-child{display:none}
+  .topbar nav{gap:2px}
+  .topbar nav a{padding:8px 9px;font-size:12px;white-space:nowrap}
+}
