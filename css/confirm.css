@@ -25,3 +25,17 @@ input::placeholder{color:#7d838c;opacity:1}
   .topbar nav{gap:2px}
   .topbar nav a{padding:8px 9px;font-size:12px;white-space:nowrap}
 }
+
+/* Keep the form and its primary action close at hand on phones. */
+@media(max-width:780px){
+  [data-view="survey"]{padding-top:8px}
+  [data-view="survey"] .hero{min-height:0;padding-top:14px;padding-bottom:18px;gap:16px}
+  [data-view="survey"] .hero h1{font-size:clamp(31px,9.5vw,40px);line-height:1.12;margin:10px 0}
+  [data-view="survey"] .hero-copy>p{font-size:15px;line-height:1.5;margin:8px 0;max-width:34rem}
+  [data-view="survey"] .event-meta{margin-top:14px;gap:5px;font-size:14px}
+  [data-view="survey"] .price-card{padding:16px 20px}
+  [data-view="survey"] .price-card strong{font-size:36px}
+  #submitButton{position:sticky;bottom:max(10px,env(safe-area-inset-bottom));z-index:12;box-shadow:0 12px 30px rgba(23,38,64,.32)}
+  .consent{min-height:58px;padding:12px 9px}
+  .consent input{width:24px;height:24px}
+}
