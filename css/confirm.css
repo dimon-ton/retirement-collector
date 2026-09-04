@@ -1,1 +1,15 @@
 .confirm-dialog{text-align:left}.confirm-dialog>p{color:var(--muted);margin-top:6px}.confirm-summary{margin:22px 0;display:grid;grid-template-columns:1fr 1fr;background:#f5f2eb;border:1px solid var(--line);border-radius:14px;overflow:hidden}.confirm-item{padding:14px 16px;border-bottom:1px solid var(--line)}.confirm-item:nth-child(odd){border-right:1px solid var(--line)}.confirm-item.wide{grid-column:1/-1;border-right:0}.confirm-item small{display:block;color:var(--muted);font-size:12px}.confirm-item strong{display:block;color:var(--navy);margin-top:2px}.confirm-actions{display:grid;grid-template-columns:1fr 1.4fr;gap:12px}.confirm-actions .primary-button{width:100%}@media(max-width:520px){.confirm-summary{grid-template-columns:1fr}.confirm-item:nth-child(odd){border-right:0}.confirm-item.wide{grid-column:auto}.confirm-actions{grid-template-columns:1fr}.confirm-actions .ghost-button{order:2}}
+
+/* Mobile bank details: important numbers get a deliberate, unbroken row. */
+.bank-card strong{white-space:nowrap}
+.bank-card button{white-space:nowrap;min-width:68px}
+@media(max-width:520px){
+  .bank-card{display:grid;grid-template-columns:48px minmax(0,1fr) auto;column-gap:14px;row-gap:2px;align-items:center;padding:20px}
+  .bank-logo{grid-column:1;grid-row:1/3}
+  .bank-card>div:nth-child(2){display:contents}
+  .bank-card>div:nth-child(2)>small{grid-column:2/4;grid-row:1;color:#d2dae5;font-size:13px}
+  .bank-card>div:nth-child(2)>b{grid-column:2/4;grid-row:2;line-height:1.35}
+  .bank-card>div:nth-child(2)>strong{grid-column:2;grid-row:3;margin-top:14px;font-size:clamp(18px,5.5vw,22px);letter-spacing:.035em}
+  .bank-card>button{grid-column:3;grid-row:3;margin-top:14px;margin-left:0;min-width:76px}
+  .upload small{font-size:13px;line-height:1.5;padding:0 8px}
+}
