@@ -5,6 +5,7 @@ const CONFIG = {
   maxTables: 30,
   maxFileBytes: 5 * 1024 * 1024,
   sheets: { schools: 'Schools', responses: 'Responses' },
+  schoolNames: ['โรงเรียนหนองพระบางตลาดม่วง','บ้านเขวาหรดี','ชีโนวาทธำรง','โรงเรียนบ้านเขวาตะคลอง','โรงเรียนบ้านหนองอ่างดอกรัก','โรงเรียนบ้านโพนหิน','บ้านโพนแท่น','บ้านนกเหาะ','โรงเรียนบ้านหนองสระหงส์','โรงเรียนทุ่งกุลาประชารัฐ','บ้านหนองไผ่ลุ่ม','วัดแจ่มอารมณ์','โรงเรียนบ้านโพนเงินโพนทอง','โรงเรียนบ้านโพนทัน','บ้านดงครั่งใหญ่','บ้านแสนสี','บ้านดงครั่งน้อย','บ้านฮ่องทราย','บ้านไทรทอง'],
   responseHeaders: ['id','timestamp','eventId','schoolId','schoolName','numberOfTables','amount','contactName','phone','paymentMethod','slipFileId','slipUrl','paymentStatus','verifiedBy','verifiedAt','updatedAt']
 };
 
@@ -72,7 +73,7 @@ function validSession_(token){ return !!token && !!CacheService.getScriptCache()
 function adminLogout_(p,token){ CacheService.getScriptCache().remove('session_'+token); return true; }
 
 function getAdminData_(){
-  const rs=rows_('Responses'); return activeSchools_().map(s=>{const r=rs.find(x=>x.schoolId===s.schoolId&&x.eventId===CONFIG.eventId);return r?Object.assign({},r,{numberOfTables:+r.numberOfTables,amount:+r.amount,hasSlip:!!r.slipFileId,slipUrl:undefined,slipFileId:undefined}):{schoolId:s.schoolId,schoolName:s.schoolName,paymentStatus:'MISSING'};});
+  const rs=rows_('Responses'); return activeSchools_().map(s=>{const r=rs.find(x=>x.schoolId===s.schoolId&&x.eventId===CONFIG.eventId);return r?Object.assign({},r,{schoolName:s.schoolName,numberOfTables:+r.numberOfTables,amount:+r.amount,hasSlip:!!r.slipFileId,slipUrl:undefined,slipFileId:undefined}):{schoolId:s.schoolId,schoolName:s.schoolName,paymentStatus:'MISSING'};});
 }
 function updatePaymentStatus_(p){
   if(!['PENDING','PAID','UNPAID'].includes(String(p.status)))throw new Error('สถานะไม่ถูกต้อง');
@@ -99,7 +100,11 @@ function findOrCreateSchool_(schoolId, schoolName){
   const school={schoolId:'SCH-'+Utilities.getUuid(),schoolName:name,sortOrder:sortOrder,active:true};
   sheet_('Schools').appendRow([school.schoolId,school.schoolName,school.sortOrder,school.active]);return school;
 }
-function activeSchools_(){return rows_('Schools').filter(x=>String(x.active).toUpperCase()==='TRUE'||x.active===true).sort((a,b)=>+a.sortOrder-+b.sortOrder);}
+function activeSchools_(){
+  const canonical=CONFIG.schoolNames.map((name,i)=>({schoolId:'SCH'+Utilities.formatString('%03d',i+1),schoolName:name,sortOrder:i+1,active:true}));
+  const custom=rows_('Schools').filter(x=>!/^SCH\d{3}$/.test(String(x.schoolId))&&(String(x.active).toUpperCase()==='TRUE'||x.active===true)).sort((a,b)=>+a.sortOrder-+b.sortOrder);
+  return canonical.concat(custom);
+}
 function rows_(name){const values=sheet_(name).getDataRange().getValues();if(values.length<2)return[];return values.slice(1).map(r=>objectFrom_(values[0],r));}
 function objectFrom_(h,r){return h.reduce((o,k,i)=>(o[k]=r[i],o),{});}
 function sheet_(name){const id=PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID');if(!id)throw new Error('ยังไม่ได้ตั้งค่า Spreadsheet ID');const s=SpreadsheetApp.openById(id).getSheetByName(name);if(!s)throw new Error('ไม่พบชีต '+name);return s;}
@@ -113,7 +118,7 @@ function json_(data){return ContentService.createTextOutput(JSON.stringify(data)
 /** Run once after setting SPREADSHEET_ID. Creates headers and initial schools. */
 function setupProject(){
   const ss=SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID'));
-  const names=['โรงเรียนหนองพระบางตลาดม่วง','โรงเรียนบ้านเขวาหรดี','โรงเรียนชิโนวาทธำรง','โรงเรียนบ้านเขวาตะคลอง','โรงเรียนบ้านหนองอ่างดอกรัก','โรงเรียนบ้านโพนหิน','โรงเรียนบ้านโพนแท่น','โรงเรียนบ้านนกเหาะ','โรงเรียนบ้านหนองสระหงส์','โรงเรียนทุ่งกุลาประชารัฐ','โรงเรียนบ้านหนองไผ่ลุ่ม','โรงเรียนวัดแจ่มอารมณ์','โรงเรียนบ้านโพนเงินโพนทอง'];
+  const names=CONFIG.schoolNames;
   let s=ss.getSheetByName('Schools')||ss.insertSheet('Schools');s.clear();s.getRange(1,1,1,4).setValues([['schoolId','schoolName','sortOrder','active']]);s.getRange(2,1,names.length,4).setValues(names.map((n,i)=>['SCH'+Utilities.formatString('%03d',i+1),n,i+1,true]));s.setFrozenRows(1);
   let r=ss.getSheetByName('Responses')||ss.insertSheet('Responses');r.clear();r.getRange(1,1,1,CONFIG.responseHeaders.length).setValues([CONFIG.responseHeaders]);r.setFrozenRows(1);
 }
