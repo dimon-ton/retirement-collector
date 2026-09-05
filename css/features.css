@@ -1,0 +1,53 @@
+.custom-school {
+  margin-top: 2px;
+}
+
+.field-hint {
+  font-size: 12px;
+}
+
+.confirm-slip {
+  grid-column: 1 / -1;
+  padding: 14px 16px;
+}
+
+.confirm-slip img,
+.admin-slip img {
+  display: block;
+  width: 100%;
+  max-height: 420px;
+  object-fit: contain;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin-top: 8px;
+}
+
+.admin-slip {
+  margin: 20px 0;
+  text-align: left;
+}
+
+.admin-slip > small {
+  display: block;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.admin-slip .loading-panel {
+  min-height: 120px;
+}
+
+.slip-unavailable {
+  padding: 22px;
+  text-align: center;
+  color: var(--muted);
+  background: #f5f2eb;
+  border-radius: 10px;
+}
+
+@media (max-width: 520px) {
+  .confirm-slip {
+    grid-column: auto;
+  }
+}

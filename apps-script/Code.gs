@@ -39,7 +39,7 @@ function getPublicStatus_() {
 function submitResponse_(p) {
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
   try {
-    const school = activeSchools_().find(s => s.schoolId === String(p.schoolId || ''));
+    const school = findOrCreateSchool_(p.schoolId, p.schoolName);
     if (!school) throw new Error('กรุณาเลือกโรงเรียนที่ถูกต้อง');
     const count = Number(p.numberOfTables);
     if (!Number.isInteger(count) || count < 1 || count > CONFIG.maxTables) throw new Error('จำนวนโต๊ะไม่ถูกต้อง');
@@ -72,7 +72,7 @@ function validSession_(token){ return !!token && !!CacheService.getScriptCache()
 function adminLogout_(p,token){ CacheService.getScriptCache().remove('session_'+token); return true; }
 
 function getAdminData_(){
-  const rs=rows_('Responses'); return activeSchools_().map(s=>{const r=rs.find(x=>x.schoolId===s.schoolId&&x.eventId===CONFIG.eventId);return r?Object.assign({},r,{numberOfTables:+r.numberOfTables,amount:+r.amount,slipUrl:undefined,slipFileId:undefined}):{schoolId:s.schoolId,schoolName:s.schoolName,paymentStatus:'MISSING'};});
+  const rs=rows_('Responses'); return activeSchools_().map(s=>{const r=rs.find(x=>x.schoolId===s.schoolId&&x.eventId===CONFIG.eventId);return r?Object.assign({},r,{numberOfTables:+r.numberOfTables,amount:+r.amount,hasSlip:!!r.slipFileId,slipUrl:undefined,slipFileId:undefined}):{schoolId:s.schoolId,schoolName:s.schoolName,paymentStatus:'MISSING'};});
 }
 function updatePaymentStatus_(p){
   if(!['PENDING','PAID','UNPAID'].includes(String(p.status)))throw new Error('สถานะไม่ถูกต้อง');
@@ -88,6 +88,16 @@ function saveSlip_(slip,schoolId,id){
   const folderId=PropertiesService.getScriptProperties().getProperty('SLIP_FOLDER_ID');if(!folderId)throw new Error('ยังไม่ได้ตั้งค่าโฟลเดอร์สลิป');
   const ext=slip.type.split('/')[1].replace('jpeg','jpg'),name=Utilities.formatDate(new Date(),Session.getScriptTimeZone(),'yyyy-MM-dd')+'_'+schoolId+'_'+id+'.'+ext;
   const file=DriveApp.getFolderById(folderId).createFile(Utilities.newBlob(bytes,slip.type,name));return{id:file.getId(),url:file.getUrl()};
+}
+function findOrCreateSchool_(schoolId, schoolName){
+  const active=activeSchools_(),id=String(schoolId||'');
+  if(id){const selected=active.find(s=>s.schoolId===id);if(selected)return selected;throw new Error('กรุณาเลือกโรงเรียนที่ถูกต้อง');}
+  const name=clean_(schoolName,150);if(!name)throw new Error('กรุณากรอกชื่อโรงเรียน');
+  const normalized=name.toLocaleLowerCase();
+  const existing=active.find(s=>String(s.schoolName).trim().toLocaleLowerCase()===normalized);if(existing)return existing;
+  const all=rows_('Schools'),sortOrder=all.reduce((max,s)=>Math.max(max,+s.sortOrder||0),0)+1;
+  const school={schoolId:'SCH-'+Utilities.getUuid(),schoolName:name,sortOrder:sortOrder,active:true};
+  sheet_('Schools').appendRow([school.schoolId,school.schoolName,school.sortOrder,school.active]);return school;
 }
 function activeSchools_(){return rows_('Schools').filter(x=>String(x.active).toUpperCase()==='TRUE'||x.active===true).sort((a,b)=>+a.sortOrder-+b.sortOrder);}
 function rows_(name){const values=sheet_(name).getDataRange().getValues();if(values.length<2)return[];return values.slice(1).map(r=>objectFrom_(values[0],r));}
