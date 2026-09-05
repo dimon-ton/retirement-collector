@@ -37,8 +37,9 @@
       } else if (payload.schoolId) {
         school = canonicalSchools.find(item => item.schoolId === payload.schoolId);
       } else {
-        const name = String(payload.schoolName || "").trim();
-        if (!name) throw new Error("กรุณากรอกชื่อโรงเรียน");
+        const enteredName = String(payload.schoolName || "").trim();
+        if (!enteredName) throw new Error("กรุณากรอกชื่อโรงเรียน");
+        const name = enteredName.startsWith("โรงเรียน") ? enteredName : `โรงเรียน${enteredName}`;
         const allSchools = await API.call("getSchools");
         school = allSchools.find(item => item.schoolName.trim().toLocaleLowerCase() === name.toLocaleLowerCase());
         if (!school) {

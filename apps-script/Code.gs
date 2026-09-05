@@ -4,8 +4,7 @@ const CONFIG = {
   tablePrice: 2200,
   maxTables: 30,
   maxFileBytes: 5 * 1024 * 1024,
-  sheets: { schools: 'Schools', responses: 'Responses' },
-  schoolNames: ['โรงเรียนหนองพระบางตลาดม่วง','โรงเรียนบ้านเขวาหรดี','โรงเรียนชีโนวาทธำรง','โรงเรียนบ้านเขวาตะคลอง','โรงเรียนบ้านหนองอ่างดอกรัก','โรงเรียนบ้านโพนหิน','โรงเรียนบ้านโพนแท่น','โรงเรียนบ้านนกเหาะ','โรงเรียนบ้านหนองสระหงส์','โรงเรียนทุ่งกุลาประชารัฐ','โรงเรียนบ้านหนองไผ่ลุ่ม','โรงเรียนวัดแจ่มอารมณ์','โรงเรียนบ้านโพนเงินโพนทอง','โรงเรียนบ้านโพนทัน','โรงเรียนบ้านดงครั่งใหญ่','โรงเรียนบ้านแสนสี','โรงเรียนบ้านดงครั่งน้อย','โรงเรียนบ้านฮ่องทราย','โรงเรียนบ้านไทรทอง'],
+  sheets: { schools: 'school', legacySchools: 'Schools', responses: 'Responses' },
   responseHeaders: ['id','timestamp','eventId','schoolId','schoolName','numberOfTables','amount','contactName','phone','paymentMethod','slipFileId','slipUrl','paymentStatus','verifiedBy','verifiedAt','updatedAt']
 };
 
@@ -93,21 +92,26 @@ function saveSlip_(slip,schoolId,id){
 function findOrCreateSchool_(schoolId, schoolName){
   const active=activeSchools_(),id=String(schoolId||'');
   if(id){const selected=active.find(s=>s.schoolId===id);if(selected)return selected;throw new Error('กรุณาเลือกโรงเรียนที่ถูกต้อง');}
-  const name=clean_(schoolName,150);if(!name)throw new Error('กรุณากรอกชื่อโรงเรียน');
+  const enteredName=clean_(schoolName,150);if(!enteredName)throw new Error('กรุณากรอกชื่อโรงเรียน');
+  const name=enteredName.indexOf('โรงเรียน')===0?enteredName:'โรงเรียน'+enteredName;
   const normalized=name.toLocaleLowerCase();
   const existing=active.find(s=>String(s.schoolName).trim().toLocaleLowerCase()===normalized);if(existing)return existing;
-  const all=rows_('Schools'),sortOrder=all.reduce((max,s)=>Math.max(max,+s.sortOrder||0),0)+1;
+  const all=rows_(CONFIG.sheets.schools),sortOrder=all.reduce((max,s)=>Math.max(max,+s.sortOrder||0),0)+1;
   const school={schoolId:'SCH-'+Utilities.getUuid(),schoolName:name,sortOrder:sortOrder,active:true};
-  sheet_('Schools').appendRow([school.schoolId,school.schoolName,school.sortOrder,school.active]);return school;
+  sheet_(CONFIG.sheets.schools).appendRow([school.schoolId,school.schoolName,school.sortOrder,school.active]);return school;
 }
 function activeSchools_(){
-  const canonical=CONFIG.schoolNames.map((name,i)=>({schoolId:'SCH'+Utilities.formatString('%03d',i+1),schoolName:name,sortOrder:i+1,active:true}));
-  const custom=rows_('Schools').filter(x=>!/^SCH\d{3}$/.test(String(x.schoolId))&&(String(x.active).toUpperCase()==='TRUE'||x.active===true)).sort((a,b)=>+a.sortOrder-+b.sortOrder);
-  return canonical.concat(custom);
+  return rows_(CONFIG.sheets.schools).filter(x=>String(x.active).toUpperCase()==='TRUE'||x.active===true).sort((a,b)=>+a.sortOrder-+b.sortOrder);
+}
+function ensureSchoolSheet_(){
+  const id=PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID');if(!id)throw new Error('ยังไม่ได้ตั้งค่า Spreadsheet ID');
+  const ss=SpreadsheetApp.openById(id);let sheet=ss.getSheetByName(CONFIG.sheets.schools);if(sheet)return sheet;
+  sheet=ss.getSheetByName(CONFIG.sheets.legacySchools);if(sheet){sheet.setName(CONFIG.sheets.schools);return sheet;}
+  sheet=ss.insertSheet(CONFIG.sheets.schools);sheet.getRange(1,1,1,4).setValues([['schoolId','schoolName','sortOrder','active']]);sheet.setFrozenRows(1);return sheet;
 }
 function rows_(name){const values=sheet_(name).getDataRange().getValues();if(values.length<2)return[];return values.slice(1).map(r=>objectFrom_(values[0],r));}
 function objectFrom_(h,r){return h.reduce((o,k,i)=>(o[k]=r[i],o),{});}
-function sheet_(name){const id=PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID');if(!id)throw new Error('ยังไม่ได้ตั้งค่า Spreadsheet ID');const s=SpreadsheetApp.openById(id).getSheetByName(name);if(!s)throw new Error('ไม่พบชีต '+name);return s;}
+function sheet_(name){if(name===CONFIG.sheets.schools)return ensureSchoolSheet_();const id=PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID');if(!id)throw new Error('ยังไม่ได้ตั้งค่า Spreadsheet ID');const s=SpreadsheetApp.openById(id).getSheetByName(name);if(!s)throw new Error('ไม่พบชีต '+name);return s;}
 function nextId_(){return 'RESP-'+Utilities.formatString('%04d',sheet_('Responses').getLastRow());}
 function clean_(v,max){return String(v||'').trim().replace(/[<>]/g,'').slice(0,max);}
 function digest_(v){return Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256,v).map(b=>(b+256)%256).map(b=>('0'+b.toString(16)).slice(-2)).join('');}
@@ -118,8 +122,7 @@ function json_(data){return ContentService.createTextOutput(JSON.stringify(data)
 /** Run once after setting SPREADSHEET_ID. Creates headers and initial schools. */
 function setupProject(){
   const ss=SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID'));
-  const names=CONFIG.schoolNames;
-  let s=ss.getSheetByName('Schools')||ss.insertSheet('Schools');s.clear();s.getRange(1,1,1,4).setValues([['schoolId','schoolName','sortOrder','active']]);s.getRange(2,1,names.length,4).setValues(names.map((n,i)=>['SCH'+Utilities.formatString('%03d',i+1),n,i+1,true]));s.setFrozenRows(1);
+  let s=ss.getSheetByName(CONFIG.sheets.schools)||ss.insertSheet(CONFIG.sheets.schools);if(s.getLastRow()===0)s.getRange(1,1,1,4).setValues([['schoolId','schoolName','sortOrder','active']]);s.setFrozenRows(1);
   let r=ss.getSheetByName('Responses')||ss.insertSheet('Responses');r.clear();r.getRange(1,1,1,CONFIG.responseHeaders.length).setValues([CONFIG.responseHeaders]);r.setFrozenRows(1);
 }
 
